@@ -2,9 +2,8 @@
 
 USER="centos"
 HOST="3.92.68.82"
-SRC_DIR="~/nginx-configs"
-DEST_DIR="/etc/nginx/sites-available"
-ENABLED_DIR="/etc/nginx/sites-enabled"
+SRC_DIR="./nginx-configs"
+DEST_DIR="/etc/nginx/conf.d"
 WEB_ROOT="/var/www"
 
 SITES=("rodrigonginx.com" "test.rodrigonginx.com" "other.rodrigonginx.com")
@@ -30,13 +29,13 @@ ENDSSH
 #Create /var/www directory and subdirectories for each site
 # We create the /var/www directory and subdirectories for each site using a for loop.
 echo "Creating /var/www directory and subdirectories for each site"
-ssh $USER@$HOST << 'ENDSSH'
-for site in "${SITES[@]}"; do
+ssh $USER@$HOST << ENDSSH
+for site in ${SITES[@]}; do
     sudo mkdir -p $WEB_ROOT/\$site
     sudo chown -R nginx:nginx $WEB_ROOT/\$site
     sudo chmod -R 755 $WEB_ROOT/\$site
 
-    echo "Welcome to $site" | sudo tee /var/www/$site/index.html
+    echo "Welcome to \$site" | sudo tee $WEB_ROOT/\$site/index.html
 done
 ENDSSH
 
@@ -45,23 +44,9 @@ ENDSSH
 # Possibl reaching over the internet to copy conf files
 
 echo "Copying nginx.conf files"
-scp $SRC_DIR/*.conf $USER@$HOST:$DEST_DIR
-
-echo Creating symbolic links in the enabled directory
-
-ssh $USER@$HOST << 'ENDSSH'
-for file in /etc/nginx/sites-available/*.conf; do
-    sudo ln -s $file /etc/nginx/sites-enabled/
-done
-
-ceho "Test and Reloading NGINX config"
+scp $SRC_DIR/*.conf $USER@$HOST:~
+ssh $USER@HOST << EOF
+sudo mv /home/$USER/*.conf $DEST_DIR
 sudo nginx -t
 sudo systemctl reload nginx
-ENDSSH
-
-
-
-ssh $USER@$HOST << 'ENDSSH'
-sudo nginx -t
-sudo systemctl reload nginx
-ENDSSH
+EOF
