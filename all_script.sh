@@ -9,6 +9,9 @@ WEB_ROOT="/var/www"
 SITES=("rodrigonginx.com" "test.rodrigonginx.com" "other.rodrigonginx.com")
 
 
+# WE RUN INTO MIRROR ISSUES RUN THIS:
+
+
 #Install Nginx and dependencies
 # We run "command" to check if the command exists on the remote server, if it doesn't we install it, otherwise we print a message saying it's already installed.
 
