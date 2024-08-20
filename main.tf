@@ -6,8 +6,8 @@ data "http" "myip" {
   url = "http://ipv4.icanhazip.com"
 }
 
-output "public_ip" {
-    value ="${chomp(data.http.myip.body)}"
+output "instance_public_ip" {
+  value = aws_instance.node1.public_ip
 }
 
 data "aws_route53_zone" "domain" {
@@ -27,6 +27,7 @@ resource "aws_key_pair" "ssh_key" {
 resource "aws_security_group" "sg" {
   name = "sg"
   vpc_id = aws_vpc.myvpc.id
+  depends_on = [data.http.myip]
 
     # This will allow us to access the HTTP server on Port 80, where our WP will be accessible.
   ingress {
@@ -41,7 +42,7 @@ resource "aws_security_group" "sg" {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["${public_ip}/32"]
+    cidr_blocks = ["${trimspace(data.http.myip.response_body)}/32"]
   }
 
   egress {
