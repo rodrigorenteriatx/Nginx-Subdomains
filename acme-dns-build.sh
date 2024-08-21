@@ -4,7 +4,6 @@
 #
 #INSTALL ACME-DNS (SERVER)
 #
-$SRC_DIR="./nginx-configs"
 
 git clone https://github.com/joohoi/acme-dns
 cd acme-dns
@@ -12,13 +11,16 @@ export GOPATH=/tmp/acme-dns
 go build
 
 sudo mv acme-dns /usr/local/bin
-sudo mv $SRC_DIR/config.cfg /etc/acme-dns/config.cfg
+sudo mkdir /etc/acme-dns/
+sudo mv ~/config.cfg /etc/acme-dns/config.cfg
 mv ~/go/bin/acme-dns /usr/local/bin/acme-dns
 
 #Create systemd system account for acme-dns, gecos is basically comments
-sudo adduser --system --gecos "acme-dns Service" --diabled-password --group --home /var/lib/acme-dns acme-dns 
+sudo adduser --system --gecos "acme-dns Service" --disabled-password --group --home /var/lib/acme-dns acme-dns
+mv acme-dns.service to /etc/systemd/system/acme-dns.service
 
-#MOVE acme-dns.service to /etc/systemd/system/acme-dns.service
+# sudo restorecon -Rv /etc/systemd/system/
+# chown acme-dns:acme-dns /etc/systemd/system/acme-dns.service
 
 sudo systemctl enable --now acme-dns.service
 

@@ -66,6 +66,12 @@ resource "aws_security_group" "lb-sg" {
   }
 }
 
+# resource "aws_eip" "my_eip" {
+#     instance = aws_instance.node1.id
+#     domain = "vpc"
+#     depends_on = [ aws_instance.node1 ]
+# }
+
 
 resource "aws_instance" "node1" {
   ami = var.ami

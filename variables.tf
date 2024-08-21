@@ -4,9 +4,9 @@ variable "public_key" {
 }
 
 variable "ami" {
-    #CentOS 8
+    #Ubuntu 20.04 LTS
     type = string
-    default = "ami-0cdb8266fcd5d3d63"
+    default = "ami-0d267c22adcb5e686"
 }
 
 variable "ec2-count" {
