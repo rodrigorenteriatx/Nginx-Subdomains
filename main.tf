@@ -6,6 +6,11 @@ data "http" "myip" {
   url = "http://ipv4.icanhazip.com"
 }
 
+#SAVE THE OUTPUT
+output "instance_private_ip" {
+  value = aws_instance.node1.private_ip
+}
+
 output "instance_public_ip" {
   value = aws_instance.node1.public_ip
 }
