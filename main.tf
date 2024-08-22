@@ -36,6 +36,19 @@ resource "aws_security_group" "sg" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress {
+    from_port = 53
+    to_port = 53
+    protocol = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = 53
+    to_port = 53
+    protocol = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
 
     # This will allow us to SSH into the instance for Ansible to do it's magic.
   ingress {

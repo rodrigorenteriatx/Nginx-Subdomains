@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 USER="ubuntu"  # Adjusted default user for Ubuntu AMI; change as needed
-HOST="54.85.250.133"
+HOST="3.95.178.103"
 SRC_DIR="./nginx-configs"
 DEST_DIR="/etc/nginx/conf.d"
 WEB_ROOT="/var/www"
@@ -14,8 +14,15 @@ ssh -i ~/.ssh/my_keys/id_ed25519 $USER@$HOST 'echo "Key added to agent"'
 ssh-add ~/.ssh/my_keys/id_ed25519
 
 # Update package lists and install Nginx and dependencies
-echo "Checking if Nginx is installed on $HOST"
+echo "Installing basic utillities and Checking if Nginx is installed on $HOST"
 ssh $USER@$HOST << 'ENDSSH'
+
+sudo apt update
+sudo apt upgrade -y
+sudo apt-get install -y gcc libsqlite3-dev
+sudo apt install -y curl wget git vim unzip htop
+
+
 if ! command -v nginx &> /dev/null
 then
     echo "Nginx not found, installing..."
@@ -54,9 +61,12 @@ echo $SRC_DIR/config.cfg
 echo $USER@$HOST:~
 scp ${SRC_DIR}/config.cfg $USER@$HOST:~
 ssh $USER@$HOST << EOF
-
+export CGO_ENABLED=1
+export CC=gcc
+curl -O https://dl.google.com/go/go1.23.0.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz
-export PATH=$PATH:/usr/local/go/bin
+echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
+source /etc/profile
 go version
 EOF
 
