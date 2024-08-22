@@ -5,6 +5,11 @@
 #INSTALL ACME-DNS (SERVER)
 #
 
+USER="ubuntu"
+HOST="placeholderip"
+
+ssh $USER@$HOST << EOF
+
 git clone https://github.com/joohoi/acme-dns
 cd acme-dns
 export GOPATH=/tmp/acme-dns
@@ -19,38 +24,39 @@ mv ~/go/bin/acme-dns /usr/local/bin/acme-dns
 sudo adduser --system --gecos "acme-dns Service" --disabled-password --group --home /var/lib/acme-dns acme-dns
 sudo mv acme-dns.service /etc/systemd/system/acme-dns.service
 
-# sudo restorecon -Rv /etc/systemd/system/
-# chown acme-dns:acme-dns /etc/systemd/system/acme-dns.service
 
 sudo systemctl enable acme-dns.service
 sudo systemctl start acme-dns.service
-
-cd ~
+EOF
 
 #
-#INSTALL ACME-DNS-CLIENT (ON SAME MACHINE)
+#INSTALL ACME-DNS-CLIENT (ON SAME MACHINE), AND INSTALL CERTBOT AND PREREQS
 #
+ssh $USER@$HOST << EOF
 git clone https://github.com/acme-dns/acme-dns-client
 cd acme-dns-client
 go get
 go build
 mv acme-dns-client /usr/local/bin/acme-dns-client
-cd ~
 
-#RUN THE CLIENT
 sudo snap install core
 sudo snap refresh core
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
 sudo snap set certbot trust-plugin-with-root=ok
-
+EOF
 #REGISTER BUT RUN EXPECT SCRIPT
 
+ssh $USER@$HOST "sudo acme-dns-client register -d rodrigonginx.com -s http://localhost:8080"
 
-#Guided creaton but we will try to script
-sudo acme-dns-client register -d rodrigonginx.com -s http://localhost:8080
+#POSSIBLY MAKE A BOTO3 PYTHON SCRIPT THAT REACHES OUT OT DNS PROVIDES(ROUTE 53) FROM MASTER SERVER TO ADD CNAME RECORDS _acme-challenge.yourdomain.tld
+# We will need to read output from above command for the record and CNAME value.
+#Then we can continue with script
 
-sudo certbot certonly --manual --preferred-challenges dns --manual-auth-hook 'acme-dns-client' -d *.rodrigonginx.com
+./expect_certbot.sh
+
+#MANUAL REGISTRATION
+#sudo certbot certonly --manual --preferred-challenges dns --manual-auth-hook 'acme-dns-client' -d *.rodrigonginx.com
 
 #Crontaab for renewal via dns-01 challenge
 echo "0 */12 * * *  certbot renew --manual --test-cert --preferred-challenges dns --manual-auth-hook 'acme-dns-client'" | tee -a certcron
